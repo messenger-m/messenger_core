@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 redis = { version = "1.0.1", features = ["aio", "tokio-comp"] }
 tokio = { version = "1.48.0", features = ["macros", "rt-multi-thread"] }
+tokio-postgres = "0.7.15"
