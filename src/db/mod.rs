@@ -1,2 +1,2 @@
 pub mod redis_session;
-pub mod postgres_session;
+pub mod postgres;

@@ -1,10 +1,26 @@
+use actix_web::{App, HttpServer, web};
+
+mod handlers;
+mod routes;
 mod db;
-use std::error::Error;
-use db::redis_session::connect_redis;
+mod models;
+mod services;
+mod app_state;
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    connect_redis().await?;
+use app_state::AppState;
 
-    Ok(())
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    let db = db::postgres::connect().await;
+
+    let state = web::Data::new(AppState { db });
+
+    HttpServer::new(move || {
+        App::new()
+            .app_data(state.clone())
+            .configure(routes::init_routes)
+    })
+    .bind(("127.0.0.1", 8000))?
+    .run()
+    .await
 }
