@@ -1,18 +1,7 @@
-use tokio_postgres::{Client, NoTls};
+use sea_orm::Database;
+use std::env;
 
-pub async fn connect() -> Client {
-    let (client, connection) = tokio_postgres::connect(
-        "host=localhost port=5432 user=postgres password=postgres dbname=messenger",
-        NoTls,
-    )
-    .await
-    .expect("Failed to connect to DB");
-
-    tokio::spawn(async move {
-        if let Err(e) = connection.await {
-            eprintln!("Postgres connection error: {}", e);
-        }
-    });
-
-    client
+pub async fn connect() -> sea_orm::DatabaseConnection {
+    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL not set");
+    Database::connect(database_url).await.expect("Failed to connect to DB")
 }

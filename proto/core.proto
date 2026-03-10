@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package core;
+
+option go_package = "/core;core";
+
+service CoreService {
+    rpc Login(LoginRequest) returns (LoginResponse);
+    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+}
+
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string token = 1;
+    string refresh_token = 2;
+}
+
+message CreateUserRequest {
+    string username = 1;
+    string password = 2;
+    string token = 3;
+}
+
+message CreateUserResponse {
+    bool success = 1;
+}

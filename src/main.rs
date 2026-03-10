@@ -1,26 +1,24 @@
-use actix_web::{App, HttpServer, web};
-
-mod handlers;
-mod routes;
+use std::sync::Arc;
 mod db;
-mod models;
+mod entity;
+mod grpc;
 mod services;
-mod app_state;
 
-use app_state::AppState;
+use grpc::server::start_grpc_server;
+use services::core::CoreService;
+use db::postgres;
+use dotenvy::dotenv;
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    let db = db::postgres::connect().await;
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    dotenv().ok();
 
-    let state = web::Data::new(AppState { db });
+    let db_conn = postgres::connect().await;
 
-    HttpServer::new(move || {
-        App::new()
-            .app_data(state.clone())
-            .configure(routes::init_routes)
-    })
-    .bind(("127.0.0.1", 8000))?
-    .run()
-    .await
+    let core_service = Arc::new(CoreService::new(db_conn));
+
+    // запускаем gRPC сервер
+    start_grpc_server(core_service).await?;
+
+    Ok(())
 }
