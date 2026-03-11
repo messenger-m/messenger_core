@@ -10,8 +10,6 @@ pub struct Model {
     pub login: String,
 
     pub password_hash: String,
-
-    pub token: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter)]

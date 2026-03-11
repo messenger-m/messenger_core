@@ -27,7 +27,7 @@ impl CoreGrpc for CoreGrpcServer {
             let req = request.into_inner();
     
             let result = self.core_service
-                .create_user(&req.username, &req.password, &req.token)
+                .create_user(&req.username, &req.password)
                 .await
                 .map_err(|e: String| Status::internal(e))?;
     
@@ -43,14 +43,13 @@ impl CoreGrpc for CoreGrpcServer {
 
         let req = request.into_inner();
 
-        let token = self.core_service
+        let is_user = self.core_service
             .login_user(&req.username, &req.password)
             .await
             .map_err(|e: String| Status::internal(e))?;
 
         Ok(Response::new(LoginResponse {
-            token,
-            refresh_token: "".into(),
+            success: is_user,
         }))
     }
 }

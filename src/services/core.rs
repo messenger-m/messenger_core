@@ -1,5 +1,6 @@
-use sea_orm::{DatabaseConnection, ActiveModelTrait, Set};
+use sea_orm::{DatabaseConnection, ActiveModelTrait, Set, EntityTrait, ColumnTrait, QueryFilter};
 use crate::entity::user;
+use bcrypt::verify;
 
 #[derive(Clone)]
 pub struct CoreService {
@@ -11,15 +12,14 @@ impl CoreService {
         Self { db }
     }
 
-    pub async fn create_user(&self, username: &str, password: &str, token: &str) -> Result<bool, String> {
-    println!("Core received register: user {} password {} token {}", username, password, token);
+    pub async fn create_user(&self, username: &str, password: &str) -> Result<bool, String> {
+    println!("Core received register: user {} password {}", username, password);
 
     // Создаем новую запись через ActiveModel
     let new_user = user::ActiveModel {
         login: Set(username.to_owned()),
-        password_hash: Set(password.to_owned()), // здесь позже можно хешировать!
-        token: Set(token.to_owned()),
-        ..Default::default() // id с автоинкрементом
+        password_hash: Set(password.to_owned()),
+        ..Default::default()
     };
 
     // Вставляем в БД
@@ -32,8 +32,22 @@ impl CoreService {
     }
 }
 
-    pub async fn login_user(&self, username: &str, password: &str) -> Result<String, String> {
-        println!("Core received login: {} / {}", username, password);
-        Ok("jwt_token".into())
+    pub async fn login_user(&self, username: &str, password: &str) -> Result<bool, String> {
+        println!("Core received login: {}", username);
+
+        let user = user::Entity::find()
+            .filter(user::Column::Login.eq(username))
+            .one(&self.db)
+            .await
+            .map_err(|e| format!("Database error: {}", e))?;
+
+        let user = user.ok_or("User not found".to_string())?;
+        println!("user: {}", user.login);
+
+        if !verify(password, &user.password_hash).map_err(|e| e.to_string())? {
+            return Err("Invalid password".into());
+        }
+
+        Ok(true)
     }
 }

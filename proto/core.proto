@@ -15,14 +15,12 @@ message LoginRequest {
 }
 
 message LoginResponse {
-    string token = 1;
-    string refresh_token = 2;
+    bool success = 1;
 }
 
 message CreateUserRequest {
     string username = 1;
     string password = 2;
-    string token = 3;
 }
 
 message CreateUserResponse {

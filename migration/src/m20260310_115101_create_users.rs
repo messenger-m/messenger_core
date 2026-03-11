@@ -20,7 +20,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Users::Id).integer().not_null().auto_increment().primary_key())
                     .col(ColumnDef::new(Users::Login).string().not_null().unique_key())
                     .col(ColumnDef::new(Users::PasswordHash).string().not_null())
-                    .col(ColumnDef::new(Users::Token).string().not_null())
                     .to_owned(),
             )
             .await
@@ -39,5 +38,4 @@ enum Users {
     Id,
     Login,
     PasswordHash,
-    Token,
 }
